@@ -16,7 +16,7 @@ $getAllAdvanceSales = ORM::for_table('jst_advance_sale')->table_alias('ad')
 	    </div>
 	    <!-- /.col-lg-12 -->
 	</div>
-	<a href="adduser.php"><button class="btn btn-success">Add Advance Sale</button></a>
+	<a href="addadvancesale.php"><button class="btn btn-success">Add Advance Sale</button></a>
 	<button class="btn btn-danger" onclick="deleteChecked('deletionForm','ids');">Delete</button>
 	<div class="clearfix" style="height:10px;"></div>
 	<table class="table table-bordered userListDataTable">
@@ -54,7 +54,7 @@ $getAllAdvanceSales = ORM::for_table('jst_advance_sale')->table_alias('ad')
 					<td><?php echo count($itemsRec); ?></td>
 					<td><?php if($adsale->sale_id != "") { echo "Yes"; } else { echo "No"; } ?></td>
 					<td><?php echo $adsale->created_on; ?></td>
-					<td><button onclick="showDetails('<?php echo $adsale->id; ?>')" type="button" class="btn btn-info btn-sm">View</button> <a href="createadvanceinvoice.php?uid=<?php echo $adsale->id; ?>" class="btn btn-info btn-sm">Reciept</a> <a href="addadvancesale.php?uid=<?php echo $adsale->id; ?>" class="btn btn-info btn-sm">Edit</a></td>
+					<td><button onclick="showDetails('<?php echo $adsale->id; ?>')" type="button" class="btn btn-info btn-sm">View</button> <a href="helpers/createadvanceinvoice.php?adid=<?php echo $adsale->id; ?>" class="btn btn-info btn-sm">Reciept</a> <a href="addadvancesale.php?adid=<?php echo $adsale->id; ?>" class="btn btn-info btn-sm">Edit</a></td>
 				</tr>
 				<?php 
 				}
@@ -85,12 +85,14 @@ $getAllAdvanceSales = ORM::for_table('jst_advance_sale')->table_alias('ad')
 						{
 							//Lets create the header, considering the first row is always the header
 							var subTbl = document.createElement("TABLE");
-							subTbl.style.borderSpacing = '5px';
+							subTbl.style.borderSpacing = '0px';
 							subTbl.style.borderCollapse = 'separate';
+							subTbl.border = '1';
 							var hdrrow = subTbl.insertRow();
 							for(var k = 0; k<data.data[i][0].length; k++)
 							{
 								var hdrCol = hdrrow.insertCell(k);	
+								hdrCol.style.padding = "2px";
 								hdrCol.innerHTML = "<b>"+data.data[i][0][k]+"</b>";	
 							}	
 							
@@ -101,7 +103,8 @@ $getAllAdvanceSales = ORM::for_table('jst_advance_sale')->table_alias('ad')
 								var cellCnt = 0;
 								for(var echchol in data.data[i][k])
 								{
-									var eCol = echrow.insertCell(cellCnt);	
+									var eCol = echrow.insertCell(cellCnt);
+									eCol.style.padding = "2px";	
 									eCol.innerHTML = data.data[i][k][echchol];		
 									cellCnt++;
 								}								

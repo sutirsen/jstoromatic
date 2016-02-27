@@ -22,6 +22,17 @@
             </li>
             <li>
                 <!--<a href="listusers.php"><i class="fa fa-users fa-fw"></i> Users</a> -->
+                <a href="#"><i class="glyphicon glyphicon-shopping-cart fa-fw"></i> Sales<span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level">
+                    <li>
+                        <a href="listadvancesales.php">Advances</a>
+                    </li>
+                </ul>
+                <!-- /.nav-second-level -->
+            </li>
+
+            <li>
+                <!--<a href="listusers.php"><i class="fa fa-users fa-fw"></i> Users</a> -->
                 <a href="#"><i class="fa fa-users fa-fw"></i> Customers<span class="fa arrow"></span></a>
                 <ul class="nav nav-second-level">
                     <li>

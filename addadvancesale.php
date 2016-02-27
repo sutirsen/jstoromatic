@@ -34,39 +34,65 @@
 			$advanceSaleItemTbl->item_price_rating_id 	= $_POST['itempricing'][$sid];
 			$advanceSaleItemTbl->save();
 		}
-		//echo "<script>window.location='listadvancesales.php';</script>";
-	}
 
-	//Deal with edit later
-	if(isset($_POST['editadvancesale']))
-	{
-		$advancesaleEditTbl = ORM::for_table('jst_pricing_rate_type')->find_one($_GET['advancesaleid']);
-		$dataArr = array(
-					    'type_name' 	=> $_POST['type_name'],
-					    'type_value' 	=> $_POST['type_value'],
-					    'status' 		=> $_POST['status'],
-					    'updated_on' 	=> date('Y-m-d H:i:s')
-					);
-		$advancesaleEditTbl->set($dataArr);		
-		$advancesaleEditTbl->save();
+		addMessageFlash("success","custom","","","","Advance added to the system!");
 		echo "<script>window.location='listadvancesales.php';</script>";
 	}
 	
-
-
-	//fetch Product Categories details 
-	if(isset($_GET['advancesaleid']))
+	function decodeRatingString($rtString)
 	{
-		$getadvancesale = ORM::for_table('jst_pricing_rate_type')->find_one($_GET['advancesaleid']);
+		$ratingString = [];
+		$intermRateString = explode("|", $rtString);
+		foreach ($intermRateString as $idvalue) {
+			$idValArr = explode(",", $idvalue);
+			$rateObj = ORM::for_table('jst_pricing_rate_type')->find_one($idValArr[0]);
+			$ratingString[$idValArr[0]] = $rateObj->type_name;
+		}
+		return $ratingString;
+	}
+
+	$rtStr = "";
+	//fetch Product Categories details 
+	if(isset($_GET['adid']))
+	{
+		$advanceSale = ORM::for_table('jst_advance_sale')->find_one($_GET['adid']);
+		$advanceSalesItems = ORM::for_table('jst_advance_sale_items')->where_equal('advance_sale_id',$_GET['adid'])->find_many();		
+		$rtStr = decodeRatingString($advanceSale->rate_string);
+
+		//Deal with edit later
+		if(isset($_POST['editadvancesale']))
+		{
+			$dataArr = array(
+						    'customer_id' 	=> $_POST['customer_id'],
+						    'shop_id' 		=> $_POST['shop_id']
+						);
+			$advanceSale->set($dataArr);		
+			$advanceSale->save();
+			ORM::for_table('jst_advance_sale_items')->where_equal('advance_sale_id',$_GET['adid'])->delete_many();
+
+			foreach ($_POST['itemtype'] as $sid => $itmType) {
+				$advanceSaleItemTbl = ORM::for_table('jst_advance_sale_items')->create();
+				$advanceSaleItemTbl->advance_sale_id 		= $_GET['adid'];
+				$advanceSaleItemTbl->item_name 				= $_POST['itemname'][$sid];
+				$advanceSaleItemTbl->item_type 				= $itmType;
+				$advanceSaleItemTbl->purity 				= $_POST['itempurity'][$sid];
+				$advanceSaleItemTbl->weightoramt 			= $_POST['itemweightoramt'][$sid];
+				$advanceSaleItemTbl->item_price_rating_id 	= $_POST['itempricing'][$sid];
+				$advanceSaleItemTbl->save();
+			}
+			addMessageFlash("success","custom","","","","Advance edited successfully!");
+			echo "<script>window.location='listadvancesales.php';</script>";
+		}
 	}
 
 	$getAllCustomersForAdvanceSale = ORM::for_table('jst_customers')->find_many();
 	$getAllShopForAdvanceSale = ORM::for_table('jst_shop')->find_many();
+
 ?>
 <div id="page-wrapper">
 	<div class="row">
 	    <div class="col-lg-12">
-	        <h1 class="page-header"><?php if(isset($getadvancesale)) { ?>Edit Advance Sale<?php } else { ?>Add Advance Sale<?php } ?></h1>
+	        <h1 class="page-header"><?php if(isset($advanceSale)) { ?>Edit Advance Sale<?php } else { ?>Add Advance Sale<?php } ?></h1>
 	    </div>
 	    <!-- /.col-lg-12 -->
 	</div>	
@@ -80,7 +106,7 @@
 						<?php 
 						foreach ($getAllCustomersForAdvanceSale as $customer) {
 							?>
-							<option value="<?php echo $customer->id; ?>"><?php echo $customer->card_id." ".$customer->fullname; ?></option>
+							<option value="<?php echo $customer->id; ?>" <?php if(isset($_GET['adid'])) { if($advanceSale->customer_id == $customer->id){ echo "selected"; } } ?>><?php echo $customer->card_id." ".$customer->fullname; ?></option>
 							<?php
 						}
 						?>
@@ -94,7 +120,7 @@
 						<?php 
 						foreach ($getAllShopForAdvanceSale as $shop) {
 							?>
-							<option value="<?php echo $shop->id; ?>"><?php echo $shop->shop_name; ?></option>
+							<option value="<?php echo $shop->id; ?>" <?php if(isset($_GET['adid'])) { if($advanceSale->shop_id == $shop->id){ echo "selected"; } } ?>><?php echo $shop->shop_name; ?></option>
 							<?php
 						}
 						?>
@@ -117,7 +143,12 @@
 						</tr>
 					</thead>
 					<tbody>
+					<?php 
+							if(!isset($_GET['adid']))
+							{
+								?>
 						<tr>
+							
 							<td>
 								<input type="text" id="itemname_1" name="itemname[]"/>
 							</td>
@@ -141,15 +172,75 @@
 								
 							</td>
 						</tr>
+						<?php
+							}
+							else
+							{
+								$cnt = 1;
+								foreach ($advanceSalesItems as $itms) {
+									?>
+									<tr>										
+										<td>
+											<input type="text" id="itemname_<?php echo $cnt; ?>" name="itemname[]" value="<?php echo $itms->item_name; ?>"/>
+										</td>
+										<td>
+											<select id="itemtype_<?php echo $cnt; ?>" name="itemtype[]" onchange="changeItemNameToCash(this)">
+												<option value="O" <?php if($itms->item_type == "O") { echo "selected"; } ?>>Ornament</option>
+												<option value="R" <?php if($itms->item_type == "R") { echo "selected"; } ?>>Raw</option>
+												<option value="C" <?php if($itms->item_type == "C") { echo "selected"; } ?>>Cash</option>
+											</select>
+										</td>
+										<td>
+											<input type="text" id="itempurity_<?php echo $cnt; ?>" name="itempurity[]" value="<?php echo $itms->purity; ?>" <?php if($itms->item_type == "C") { echo "readonly"; } ?>/>
+										</td>
+										<td>
+											<input type="text" id="itemweightoramt_<?php echo $cnt; ?>" name="itemweightoramt[]" value="<?php echo $itms->weightoramt; ?>"/>
+										</td>
+										<td>
+										 	<?php if($itms->item_type == "C") { echo "<span id='removespan_".$cnt."'>Not Applicable</span>"; } ?>
+											<select id="itempricing_<?php echo $cnt; ?>" name="itempricing[]" <?php if($itms->item_type == "C") { echo "style='display:none;'"; } ?>>
+											<?php
+											foreach ($rtStr as $rid => $rname) {
+												?>
+												<option value="<?php echo $rid; ?>" <?php if($itms->item_price_rating_id == $rid) { echo "selected"; } ?>><?php echo $rname; ?></option>
+												<?php
+											}
+											?>
+											</select>
+										</td>
+										<td>
+											<input type="button" class="btn btn-sm btn-info" id="itemDelete_<?php echo $cnt; ?>" onclick="removeRow(this)" value="Delete" />
+										</td>
+									</tr>
+									<?php
+									$cnt++;
+								}
+							}
+						?>
 					</tbody>
 				</table>
-				<input type="submit" value= "Save" <?php if(isset($getadvancesale)) { ?>name="editadvancesale"<?php } else { ?>name="addadvancesale"<?php } ?> class="btn btn-warning"/>
+				<input type="submit" value= "Save" <?php if(isset($advanceSale)) { ?>name="editadvancesale"<?php } else { ?>name="addadvancesale"<?php } ?> class="btn btn-warning"/>
 			</form>
 		</div>
 	</div>
 </div>
 <script type="text/javascript">
-	var numberOfRows = 1;
+<?php 
+	if(isset($_GET['adid']))
+	{
+			?>
+		var numberOfRows = <?php echo count($advanceSalesItems); ?>;
+		var unaffectedRowNum = <?php echo count($advanceSalesItems); ?>;
+		<?php
+	}
+	else
+	{
+		?>
+		var numberOfRows = 1;
+		var unaffectedRowNum = 1;
+		<?php
+	}
+	?>
 
 	var ratingIds = [
 		<?php
@@ -195,9 +286,17 @@
 	}
 
 	function removeRow(elem){
-		var rowToDel = elem.parentNode.parentNode;
-		var parentNode = rowToDel.parentNode;
-		parentNode.removeChild(rowToDel);
+		if(unaffectedRowNum != 1)
+		{
+			unaffectedRowNum--;
+			var rowToDel = elem.parentNode.parentNode;
+			var parentNode = rowToDel.parentNode;
+			parentNode.removeChild(rowToDel);	
+		}
+		else
+		{
+			alert("Can not delete the last row");
+		}
 	}
 
 	function generateRow()
@@ -209,6 +308,7 @@
 			"C":"Cash"
 		};
 		numberOfRows++;
+		unaffectedRowNum++;
 		var row = document.createElement('TR');
 		//Create Item Name 
 		var itemNameTd = document.createElement('TD');
@@ -441,7 +541,14 @@
 	}
 
 	$(document).ready(function(){
+		<?php 
+		if(!isset($_GET['adid']))
+		{
+		?>
 		createRatingDropdown(document.getElementById("populatePrType1"));
+		<?php
+		}
+		?>
 		$('#createNewRow').click(function(){
 			createNewItemRow();
 		});

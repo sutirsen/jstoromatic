@@ -40,6 +40,7 @@
 			array_push($tmpArr, "Name");
 			array_push($tmpArr, "Type");
 			array_push($tmpArr, "Purity");
+			array_push($tmpArr, "Weight or Amount");
 			array_push($tmpArr, "Rating Type");
 			array_push($resp['data']['Items'], $tmpArr);
 			foreach ($advanceSaleItems as $itemRecs) {
@@ -49,8 +50,16 @@
 				array_push($tmpArr, $itemRecs->item_type);
 				array_push($tmpArr, $itemRecs->purity);
 				array_push($tmpArr, $itemRecs->weightoramt);
-				$ratingType =  ORM::for_table('jst_pricing_rate_type')->find_one($itemRecs->item_price_rating_id);
-				array_push($tmpArr, $ratingType->type_name);
+				if($itemRecs->item_type == "C")
+				{
+					array_push($tmpArr, "NA");
+				}
+				else
+				{
+					$ratingType =  ORM::for_table('jst_pricing_rate_type')->find_one($itemRecs->item_price_rating_id);
+					array_push($tmpArr, $ratingType->type_name);	
+				}
+				
 				array_push($resp['data']['Items'], $tmpArr);
 			}
 
