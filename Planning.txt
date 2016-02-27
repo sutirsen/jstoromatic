@@ -1,0 +1,43 @@
+Planning 
+
+Sale -> Partial Sale on Item 		-> Provide Item Level Partial Sale check box [Full Paid (default), Partial Payment] -> Record the installments 
+		
+		Partial Sale on total bill 	-> Provide Partial Sale on Full Bill Amount (The Items will have Full Paid option checked)
+
+Invoice Need to created
+Customer Card Need to be created (Pre-created?)
+
+0. Need to create pricing_category table with type and price
+1. Need to add "Product Pricing Category : " at category Level 
+2. Need to add "Product Pricing Category : " at product Level
+3. Make a Setting Page to update rates and VAT %
+4. Make a Shop table and add shop as a prop to sell 
+5. Need to check if all potential field are float
+
+
+Sale Prerequisite
+1. Pricing rate table insert update
+2. Shop Table Setup
+3. introduce the pricing rate to category and item
+
+
+Pricing Rate Updation -> Update from DashBoard
+
+Trend Chart Ideas -> Trend Chart for Sale over Month/Year (X Axis Being Month/Year, Y Axis being count of sale)
+
+Create  purchase record
+Purchase should also have category type
+Fetch Sale and Reduct from Item Added in Cart 
+
+
+Creating Separate Entity Named "Advanced"
+Advance - id, customer_id, 
+advance_rates - id, advance_id, rate_id, rate
+advance_items - id, advance_id, item_type (O, C), item_pricing_type, weight_or_amount, 
+
+Sale - 
+
+All advance amount should be applicable to total amount selling
+All Ornament should be 
+
+	
