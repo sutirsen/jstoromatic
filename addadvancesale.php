@@ -9,7 +9,7 @@
 		//#TODO improve it
 		$rateString = "";
 		foreach ($getAllPriceRatingsAdvance as $prating) {
-			$rateString .= $prating->id . ",". $prating->type_name."|"; 	
+			$rateString .= $prating->id . ",". $prating->type_value."|"; 	
 		} 
 		$rateString = trim($rateString, "|");
 
@@ -34,10 +34,10 @@
 			$advanceSaleItemTbl->item_price_rating_id 	= $_POST['itempricing'][$sid];
 			$advanceSaleItemTbl->save();
 		}
-		echo "<script>window.location='listadvancesales.php';</script>";
+		//echo "<script>window.location='listadvancesales.php';</script>";
 	}
 
-	//Edit Pricing Rates
+	//Deal with edit later
 	if(isset($_POST['editadvancesale']))
 	{
 		$advancesaleEditTbl = ORM::for_table('jst_pricing_rate_type')->find_one($_GET['advancesaleid']);

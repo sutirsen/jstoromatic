@@ -1,32 +1,71 @@
 <?php require_once('../connect.php'); ?>
 <?php
-	if(isset($_GET['uid']))
+	if(isset($_GET['adid']))
 	{
-		$user = ORM::for_table('jst_users')->join('jst_user_type', array('jst_users.type', '=', 'jst_user_type.id'))->find_one($_GET['uid']);
-		if($user)
+		$advanceSale = ORM::for_table('jst_advance_sale')->table_alias('ad')
+													    ->select('ad.*')
+													    ->select('cust.fullname', 'customer_name')
+													    ->select('shop.shop_name', 'shop_name')
+													    ->join('jst_customers', array('ad.customer_id', '=', 'cust.id'), 'cust')
+													    ->join('jst_shop', array('ad.shop_id', '=', 'shop.id'), 'shop')
+													    ->order_by_desc('created_on')->find_one($_GET['adid']);
+		if($advanceSale)
 		{
-			$currentDate = new DateTime("now");
-			$dob = date_create($user->dateofbirth);
-			$dob->setDate(date('Y'), $dob->format('m'), $dob->format('d'));
-			$leftDays = "";
-			if($dob > $currentDate)
+			//Get advance sale items
+			$advanceSaleItems = ORM::for_table('jst_advance_sale_items')->where_equal('advance_sale_id',$_GET['adid'])->find_many();
+
+			//Get Sales date if sale id exists on record
+			$soldOn = "";
+			if($advanceSale->sale_id != "")
 			{
-				$diffBetweenCurrent = date_diff($dob, $currentDate);
-				$leftDays = ceil($diffBetweenCurrent->y * 365.25 + $diffBetweenCurrent->m * 30 + $diffBetweenCurrent->d + $diffBetweenCurrent->h/24 + $diffBetweenCurrent->i / 60);
+				$saleInformation = ORM::for_table('jst_sales')->find_one($advanceSale->sale_id);
+				$soldOn = $saleInformation->sold_on;
 			}
-			
+
+			//Get rating details
+			$ratingDetails = decodeRatingString($advanceSale->rate_string);
+
 			$resp  = [];
 			$resp['status'] = "success";
 			$resp['data'] = '';
-			$resp['data']['Name'] = $user->firstname." ".$user->lastname;
-			$resp['data']['Email'] = $user->email;
-			$resp['data']['Date of Birth'] = ($leftDays != "" )?date('jS, F, Y', strtotime($user->dateofbirth))." - Days left : <b>".$leftDays."</b>":date('jS, F, Y', strtotime($user->dateofbirth));
-			$resp['data']['Phone Number'] = $user->phnnumber;
-			$resp['data']['Alternative Phone Number'] = $user->altphnnumber;
-			$resp['data']['Address'] = $user->address;
-			$resp['data']['Status'] = ($user->status == "A")?"<span class='bg-success'>Active</span>":"<span class='bg-danger'>Deactivated</span>";
-			$resp['data']['Position'] = $user->type_name;
-			$resp['data']['Created On'] = $user->createdon;
+			$resp['data']['Customer Name'] = $advanceSale->customer_name;
+			$resp['data']['Shop Name'] = $advanceSale->shop_name;
+			$resp['data']['Sold on'] = ($soldOn == "") ? "Not sold yet" : $soldOn;
+			$resp['data']['Advance Date'] = $advanceSale->created_on;
+			//Lets Include the items
+			$resp['data']['Items'] = [];
+
+			//Making first row as the header
+			$tmpArr = [];
+			array_push($tmpArr, "Name");
+			array_push($tmpArr, "Type");
+			array_push($tmpArr, "Purity");
+			array_push($tmpArr, "Rating Type");
+			array_push($resp['data']['Items'], $tmpArr);
+			foreach ($advanceSaleItems as $itemRecs) {
+				//Making first row as the header
+				$tmpArr = [];
+				array_push($tmpArr, $itemRecs->item_name);
+				array_push($tmpArr, $itemRecs->item_type);
+				array_push($tmpArr, $itemRecs->purity);
+				array_push($tmpArr, $itemRecs->weightoramt);
+				$ratingType =  ORM::for_table('jst_pricing_rate_type')->find_one($itemRecs->item_price_rating_id);
+				array_push($tmpArr, $ratingType->type_name);
+				array_push($resp['data']['Items'], $tmpArr);
+			}
+
+			//Including the rating stamp
+			$resp['data']['Ratings'] = [];
+			$tmpArr = [];
+			array_push($tmpArr, "Type");
+			array_push($tmpArr, "Price");
+			array_push($resp['data']['Ratings'], $tmpArr);
+			foreach ($ratingDetails as $typName => $typVal) {
+				$tmpArr = [];
+				array_push($tmpArr, $typName);
+				array_push($tmpArr, $typVal);
+				array_push($resp['data']['Ratings'], $tmpArr);
+			}
 			echo json_encode($resp);
 		}
 		else
@@ -44,6 +83,18 @@
 		$resp['status'] = "error";
 		$resp['data'] = "";
 		echo json_encode($resp);
+	}
+
+	function decodeRatingString($rtString)
+	{
+		$ratingString = [];
+		$intermRateString = explode("|", $rtString);
+		foreach ($intermRateString as $idvalue) {
+			$idValArr = explode(",", $idvalue);
+			$rateObj = ORM::for_table('jst_pricing_rate_type')->find_one($idValArr[0]);
+			$ratingString[$rateObj->type_name] = $idValArr[1];			
+		}
+		return $ratingString;
 	}
 	
 ?>

@@ -2,11 +2,11 @@
 include('reusables/header.php'); 
 $getAllAdvanceSales = ORM::for_table('jst_advance_sale')->table_alias('ad')
 													    ->select('ad.*')
-													    ->select('cus.fullname', 'customer_name')
+													    ->select('cust.fullname', 'customer_name')
 													    ->select('shop.shop_name', 'shop_name')
-													    ->join('jst_customers', array('ad.customer_id', '=', 'cus.id'), 'cus')
-													    ->join('jst_shop', array('ad.customer_id', '=', 'cus.id'), 'cus')
-													    ->order_by_desc('createdon')->find_many();
+													    ->join('jst_customers', array('ad.customer_id', '=', 'cust.id'), 'cust')
+													    ->join('jst_shop', array('ad.shop_id', '=', 'shop.id'), 'shop')
+													    ->order_by_desc('created_on')->find_many();
 
 ?>
 <div id="page-wrapper">
@@ -45,7 +45,7 @@ $getAllAdvanceSales = ORM::for_table('jst_advance_sale')->table_alias('ad')
 			{				
 				foreach ($getAllAdvanceSales as $adsale) {
 					#Get items information
-					$itemsRec = ORM::for_table('jst_advance_sale_items')->where_equals('advance_sale_id',$adsale->id)->find_many();
+					$itemsRec = ORM::for_table('jst_advance_sale_items')->where_equal('advance_sale_id',$adsale->id)->find_many();
 				?>
 				<tr>
 					<td><input type="checkbox" class="selectable" value='<?php echo $adsale->id; ?>'/></td>
@@ -66,7 +66,7 @@ $getAllAdvanceSales = ORM::for_table('jst_advance_sale')->table_alias('ad')
 <script type="text/javascript">
 	function showDetails(id)
 	{
-		$.get("helpers/getuserdetails.php?uid="+id, function(data, status){
+		$.get("helpers/getadvancesaledetails.php?adid="+id, function(data, status){
 			if(status == "success")
 			{
 				data = JSON.parse(data);
@@ -81,7 +81,39 @@ $getAllAdvanceSales = ORM::for_table('jst_advance_sale')->table_alias('ad')
 						var legends = row.insertCell(0);
 						legends.innerHTML = "<b>"+i+"</b>";
 						var dataVal = row.insertCell(1);
-						dataVal.innerHTML = data.data[i];
+						if(Array.isArray(data.data[i]))
+						{
+							//Lets create the header, considering the first row is always the header
+							var subTbl = document.createElement("TABLE");
+							subTbl.style.borderSpacing = '5px';
+							subTbl.style.borderCollapse = 'separate';
+							var hdrrow = subTbl.insertRow();
+							for(var k = 0; k<data.data[i][0].length; k++)
+							{
+								var hdrCol = hdrrow.insertCell(k);	
+								hdrCol.innerHTML = "<b>"+data.data[i][0][k]+"</b>";	
+							}	
+							
+							//Lets create the body
+							for(var k = 1; k<data.data[i].length; k++)
+							{
+								var echrow = subTbl.insertRow();
+								var cellCnt = 0;
+								for(var echchol in data.data[i][k])
+								{
+									var eCol = echrow.insertCell(cellCnt);	
+									eCol.innerHTML = data.data[i][k][echchol];		
+									cellCnt++;
+								}								
+							}
+							dataVal.appendChild(subTbl);
+							
+						}
+						else
+						{
+							dataVal.innerHTML = data.data[i];	
+						}
+						
 					}
 
 					var insertUserData = document.getElementById('insertUserDataHere');
