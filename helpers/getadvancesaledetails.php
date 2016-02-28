@@ -47,7 +47,7 @@
 				//Making first row as the header
 				$tmpArr = [];
 				array_push($tmpArr, $itemRecs->item_name);
-				array_push($tmpArr, $itemRecs->item_type);
+				array_push($tmpArr, convertItemTypeToText($itemRecs->item_type));
 				array_push($tmpArr, $itemRecs->purity);
 				array_push($tmpArr, $itemRecs->weightoramt);
 				if($itemRecs->item_type == "C")
@@ -104,6 +104,22 @@
 			$ratingString[$rateObj->type_name] = $idValArr[1];			
 		}
 		return $ratingString;
+	}
+
+	function convertItemTypeToText($itmType)
+	{
+		if($itmType == "O")
+		{
+			return "Ornament";
+		}
+		else if($itmType == "C")
+		{
+			return "Cash";
+		}
+		else
+		{
+			return "Raw Material";
+		}
 	}
 	
 ?>

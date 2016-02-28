@@ -1,5 +1,36 @@
 <?php require_once('reusables/header.php'); ?>
 <?php
+
+	//delete code for users
+	if(isset($_POST['removeadvancesales']) && isset($_POST['ids']))
+	{
+		$ids = trim($_POST['ids'],",");
+		$id_arr = explode(",", $ids);
+		$errorWhileDeletingAny = false;
+		foreach ($id_arr as $id) {
+
+			$advanceSale = ORM::for_table('jst_advance_sale')->find_one($id);
+			if($advanceSale->sale_id == "")
+			{
+				$advanceSale->delete();
+				ORM::for_table('jst_advance_sale_items')->where_equal('advance_sale_id',$id)->delete_many();
+			}
+			else
+			{
+				$errorWhileDeletingAny = true;
+			}			
+		}
+		if($errorWhileDeletingAny)
+		{
+			addMessageFlash("success","custom","","","","Some of it were not deleted because sales record exist for them!");
+		}
+		else
+		{
+			addMessageFlash("success","custom","","","","All of them were deleted!");
+		}
+		echo "<script>window.location='listadvancesales.php';</script>";
+	}
+
 	//Add Pricing Rates
 	if(isset($_POST['addadvancesale']))
 	{

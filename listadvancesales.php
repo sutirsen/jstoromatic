@@ -153,9 +153,9 @@ $getAllAdvanceSales = ORM::for_table('jst_advance_sale')->table_alias('ad')
   </div>
 </div>
 <div style="display:none;">
-	<form id="deletionForm" action="adduser.php" method="post">
+	<form id="deletionForm" action="addadvancesale.php" method="post">
 		<input type="hidden" name="ids" id="ids" value=""/>
-		<input type="hidden" name="removeusers" value="1"/>
+		<input type="hidden" name="removeadvancesales" value="1"/>
 	</form>
 </div>
 <?php include('reusables/footer.php'); ?>
