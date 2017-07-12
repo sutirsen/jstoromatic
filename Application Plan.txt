@@ -1,3 +1,0 @@
-- Product Category -> Gold Ornament, Silver Ornaments
-- Product -> Gold Chain, Gold Ring, Silver Chain
-- Product Item -> Individual Gold Chain
