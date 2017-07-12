@@ -25,7 +25,18 @@ if(isset($_POST['loginBtn']))
             $_SESSION['user']['email'] = $user->eamil;
             $_SESSION['user']['type'] = $user->type;
             $_SESSION['user']['status'] = $user->status;
-            echo "<script>window.location='dashboard.php';</script>";   
+            
+            
+            if(!isset($_SESSION['redirectTo']))
+            {
+                $redirectTo = 'dashboard.php';
+            }
+            else
+            {
+                $redirectTo = $_SESSION['redirectTo'];
+                unset($_SESSION['redirectTo']);   
+            }
+            echo "<script>window.location='".$redirectTo."';</script>";
             die();
         }
         else

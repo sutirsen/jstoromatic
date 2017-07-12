@@ -3,5 +3,5 @@
 
 	ORM::configure('mysql:host=localhost;dbname=jstoromatic', null);
 	ORM::configure('username', 'root');
-	ORM::configure('password', '');
+	ORM::configure('password', '123456');
 ?>

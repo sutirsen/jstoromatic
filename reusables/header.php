@@ -1,8 +1,9 @@
 <?php session_start(); ?>
 <?php require_once('connect.php'); ?>
-<?php 
+<?php
     if(!isset($_SESSION['user']))
     {
+        $_SESSION['redirectTo'] = "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
         echo "<script>window.location='index.php';</script>";
     }
     $userSessionData = $_SESSION['user'];
@@ -22,13 +23,13 @@
             $userPerm = ORM::for_table('jst_page_permission')->where(array(
                                                                 'user_id'        => $userSessionData['id'],
                                                                 'page_name'      => $fileName
-                                                            ))->find_one(); 
+                                                            ))->find_one();
             if(!$userPerm)
             {
                 echo "<script>window.location='cannotaccess.php';</script>";
             }
         }
-    }  
+    }
 
 ?>
 <?php require_once('reusables/messagingutils.php'); ?>
@@ -64,7 +65,7 @@
     <link href="thirdparty/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 
     <!-- DataTables CSS -->
-    <link href="thirdparty/dataTableUpgrade/dataTables.css" rel="stylesheet">
+    <link href="thirdparty/dataTableUpgrade/datatables.css" rel="stylesheet">
 
     <!-- Bootstrap jQuery Chosen CSS -->
     <link href="css/bootstrap-chosen.css" rel="stylesheet">
@@ -95,7 +96,13 @@
     <script src="thirdparty/metisMenu/dist/metisMenu.min.js"></script>
 
     <!-- DataTables JavaScript -->
-    <script src="thirdparty/dataTableUpgrade/dataTables.js"></script>
+    <script src="thirdparty/dataTableUpgrade/datatables.js"></script>
+
+    <!-- Crel -->
+    <script src="js/crel.js"></script>
+
+    <!-- Lodash -->
+    <script src="js/lodash.js"></script>
 
     <!-- Custom Theme JavaScript -->
     <script src="js/sb-admin-2.js"></script>
@@ -121,7 +128,7 @@
     <!-- All application level javascript code -->
     <script src='js/app.js'></script>
 
-    
+
 </head>
 
 <body>

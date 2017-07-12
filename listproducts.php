@@ -1,5 +1,18 @@
 <?php
 include('reusables/header.php'); 
+function getParentBreadCrumb($id)
+{
+	$pcat = ORM::for_table('jst_product_category')->find_one($id);
+	if($pcat->parent_id != "" && $pcat->parent_id != 0)
+	{
+		return getParentBreadCrumb($pcat->parent_id) . " > ". $pcat->name;
+	}
+	else
+	{
+		return $pcat->name;
+	}
+}
+
 $getAllProducts = ORM::for_table('jst_product')
 					->table_alias('prod')
 					->select('prod.*')
@@ -61,7 +74,7 @@ $getAllProducts = ORM::for_table('jst_product')
 					<td><input type="checkbox" class="selectable" value='<?php echo $product->id; ?>'/></td>
 					<td><?php echo $product->name; ?></td>
 					<td><?php echo $product->description; ?></td>
-					<td><?php echo $product->category; ?></td>
+					<td><?php echo getParentBreadCrumb($product->category_id); ?></td>
 					<td><?php echo count($stockData); ?></td>
 					<td><a href="addproduct.php?productid=<?php echo $product->id; ?>" class="btn btn-info btn-sm">Edit</a> <a href="listitems.php?product_id=<?php echo $product->id; ?>" class="btn btn-info btn-sm">Items</a></td>
 				</tr>

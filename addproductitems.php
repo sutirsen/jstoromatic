@@ -125,7 +125,7 @@
 				</div>
 				<div class="form-group">
 					<label for="pricewithoutmkchrg">Price (Without Making Charge) *</label>
-					<input type="text" class="form-control" id="pricewithoutmkchrg" name="pricewithoutmkchrg" placeholder="Price (Without Making Charge)" <?php if(isset($getitems)) { ?>value="<?php echo $getitems->pricewithoutmkchrg; ?>"<?php } ?> required>
+					<input type="text" class="form-control" id="pricewithoutmkchrg" name="pricewithoutmkchrg" placeholder="Price (Without Making Charge)" <?php if(isset($getitems)) { ?>value="<?php echo $getitems->pricewithoutmkchrg; ?>"<?php } ?> >
 					<span class="help-block with-errors"></span>
 				</div>
 				<div class="form-group">
